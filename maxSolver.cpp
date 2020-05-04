@@ -13,6 +13,7 @@ void init(int i,int a,int b,int lo[],int hi[])
 {
 	lo[i]=a;
 	hi[i]=b;
+    cout<<i<<" "<<lo[i]<<" "<<hi[i]<<endl;
 	if(a==b)
 		return;
 	int m=(a+b)/2;
@@ -20,6 +21,7 @@ void init(int i,int a,int b,int lo[],int hi[])
 	init(2*i+1,m+1,b,lo,hi);
 }
 int merge(int nodeNo,int leftCount,int rightCount,Solver &ms_solver){
+    cout<<"merge on "<<nodeNo<<endl;
     vector <int>* newVector = new vector<int>; 
     for(int i=0;i<=leftCount+rightCount;i++){  
         ms_solver.newVar();
@@ -28,8 +30,8 @@ int merge(int nodeNo,int leftCount,int rightCount,Solver &ms_solver){
     tree[nodeNo]=newVector;
     // clause addition
     for(int i=1;i<=leftCount+rightCount;i++){
-        for(int j=1;j<=leftCount;j++){
-            if(i-j>=1 && (i-j)<=rightCount){
+        for(int j=0;j<=leftCount;j++){
+            if(i-j>=0 && (i-j)<=rightCount){
                 if(j==0){
                     cout<<(*tree[2*nodeNo+1])[i-j]<<" -> "<<(*tree[nodeNo])[i]<<" "<<i<<endl;
                     vec <Lit> clause;
@@ -58,7 +60,7 @@ int merge(int nodeNo,int leftCount,int rightCount,Solver &ms_solver){
     return rightCount+leftCount;
 }
 int build(int i,int lo[],int hi[],Solver &ms_solver){    
-    cout<<i<<endl;
+    cout<<i<<" "<<lo[i]<<" "<<hi[i]<<endl;
     int l=lo[i];
 	int r=hi[i];
 	if(l==r){
@@ -67,6 +69,11 @@ int build(int i,int lo[],int hi[],Solver &ms_solver){
         ms_solver.newVar();
         newVector->push_back(variableCounter++);
         newVector->push_back(variableCounter++);
+        vec <Lit> clause;
+        clause.push(mkLit(totalVariables+lo[i],false));
+        clause.push(mkLit(variableCounter-1,true));
+        ms_solver.addClause(clause);
+        cout<<"-"<<totalVariables+lo[i]<<" "<<variableCounter-1<<endl;
         tree[i]=newVector;
         return 1; 
 	}
@@ -94,6 +101,7 @@ int main(){
         cin>>ch;
     }
     cin>>str>>totalVariables>>totalClauses;
+    cout<<totalVariables<<" "<<totalClauses<<endl;
     vector<int>input; // stores literals
     Solver MS_Solver;
 	initSolver(MS_Solver);	
@@ -102,13 +110,15 @@ int main(){
         vec < Lit > clause;
         if(inp==0){
             for(auto literal:input){
+                cout<<literal<<" ";
                 if(literal > 0)
                     clause.push(mkLit(literal,true));     
                 else
                     clause.push(mkLit(literal*-1,false));
             }
+            cout<<variableCounter<<"?"<<endl;
             MS_Solver.newVar();
-            clause.push(mkLit(variableCounter++,false));
+            clause.push(mkLit(variableCounter++,true));
             MS_Solver.addClause(clause);
             input.clear();
         }else{
@@ -117,7 +127,27 @@ int main(){
     }
     /* INPUT HANDLING DONE */
     /* TOTALIZER ENCODING */
-    int lo[2*totalClauses+5],hi[2*totalClauses+5];
+    cout<<"totalizer encoding start"<<endl;
+    int lo[12*totalClauses+5],hi[12*totalClauses+5];
     init(1,1,totalClauses,lo,hi);
+    cout<<"init done"<<endl;
     build(1,lo,hi,MS_Solver);
+    cout<<"build done"<<endl;
+    vec < Lit > assumps;
+    cout<<(*tree[1])[1]<<"???"<<endl;
+	assumps.push(mkLit((*tree[1])[1], false));
+    if(MS_Solver.solve(assumps)){
+    lbool l_t((uint8_t) 1);
+        cout<<"SAT\n";
+        for (vec<Lit>::Size i = 1; i <=totalVariables+totalClauses; i++) {
+            if (MS_Solver.model[i] == l_t) {
+                cout << i << ' ';
+            }
+            else
+                cout << -(i) << ' ';
+        }
+    }else {
+        cout<<"UNSAT"<<endl;
+    }
+
 }
