@@ -1,4 +1,10 @@
 tests
+Open-WBO
+QMaxSAT2018
+tests
+tests_
+*.pdf
+*.zip
 solver.cpp
 in.txt
 *.out

@@ -134,37 +134,24 @@ int main(){
     build(1,lo,hi,MS_Solver);
     cout<<"total number of clauses "<<MS_Solver.num_clauses<<endl;
     // cout<<"build done"<<endl;
-    int low = 0;
-    int high = totalClauses;
-    int mid;
-    while(high>=low){
-        int mid=low+(high-low)/2;
+    int ans;
+    for(int i=totalClauses-1;i>=0;i--){
+        cout<<i<<endl;
         vec < Lit > assumps;    
-	    assumps.push(mkLit((*tree[1])[mid+1], false));
-        if(MS_Solver.solve(assumps)){
-            cout<<"o "<<mid<<endl;
-            high = mid -1 ;
+	    assumps.push(mkLit((*tree[1])[i+1], false));
+        if(!MS_Solver.solve(assumps)){
+            cout<<"o "<<i+2<<endl;
+            cout<<"s OPTIMUM FOUND"<<endl;
+            //  lbool l_t((uint8_t) 1);
+            // cout<<"v ";
+            // for (vec<Lit>::Size i = 1; i <=totalVariables+totalClauses; i++) {
+            //     if (MS_Solver.model[i] == l_t) {
+            //         cout << i << ' ';
+            //     }
+            //     else
+            //         cout << -(i) << ' ';
+            // }
+            break;
         }
-        else
-            low = mid +1;
     }
-    vec < Lit > OPTassumps; 
-
-    cout<<"s OPTIMUM FOUND"<<endl;
-    OPTassumps.push(mkLit((*tree[1])[low+1],false));
-    // relaxed low no of clauses
-    if(MS_Solver.solve(OPTassumps)){
-    lbool l_t((uint8_t) 1);
-        cout<<"v ";
-        for (vec<Lit>::Size i = 1; i <=totalVariables+totalClauses; i++) {
-            if (MS_Solver.model[i] == l_t) {
-                cout << i << ' ';
-            }
-            else
-                cout << -(i) << ' ';
-        }
-    }else {
-        cout<<"UNSAT Should not reach here"<<endl;
-    }
-
 }

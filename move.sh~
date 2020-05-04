@@ -1,1 +1,0 @@
-sudo docker cp $1 test-container:/assgn3/$1
